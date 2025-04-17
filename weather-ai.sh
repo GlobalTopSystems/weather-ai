@@ -46,7 +46,6 @@ echo -e " \e[31mWeather-AI:\e[0m HyperConvergent Meteorological Infrastructure A
 echo -e " for configuring and installing OpenSource Weather Software \e[31m[Computer software]\e[0m."
 echo " "
 read -p "Press enter to continue"
-
 ############################### System Architecture Type #################
 # Determine if the system is 32 or 64-bit based on the architecture
 ##########################################################################
@@ -58,8 +57,7 @@ else
 export SYSTEMBIT="32"
 fi
 # Determine the chip type if on macOS (ARM or Intel)
-if [ "$SYS_ARCH" = "arm64" ];
-then 
+if [ "$SYS_ARCH" = "arm64" ]; then 
 export MAC_CHIP="ARM"
 else
 export MAC_CHIP="Intel"
@@ -72,28 +70,23 @@ if [ "$SYS_OS" = "Darwin" ]; then export SYSTEMOS="MacOS"
 # Get the macOS version using sw_vers
 export MACOS_VERSION=$(sw_vers -productVersion)
 echo "Operating system detected: MacOS, Version: $MACOS_VERSION"
-elif [ "$SYS_OS" = "Linux" ];
-then
+elif [ "$SYS_OS" = "Linux" ]; then
 export SYSTEMOS="Linux"
 fi
 ########## RHL and Linux Distribution Detection #############
 # More accurate Linux distribution detection using /etc/os-release
 #################################################################
-if [ "$SYSTEMOS" = "Linux" ];
-then
-if [ -f /etc/os-release ];
-then
+if [ "$SYSTEMOS" = "Linux" ]; then
+if [ -f /etc/os-release ]; then
 # Extract the distribution name and version from /etc/os-release
 export DISTRO_NAME=$(grep -w "NAME" /etc/os-release | cut -d'=' -f2 | tr -d '"')
-export DISTRO_VERSION=$(grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '"')
-# Print the distribution name and version
-echo "Operating system detected: $DISTRO_NAME, Version: $DISTRO_VERSION"
-# Check if dnf or yum is installed (dnf is used on newer systems, yum on older ones)
-if command -v dnf >/dev/null 2>&1;
-then echo "dnf is installed."
-export SYSTEMOS="RHL"  # Set SYSTEMOS to RHL if dnf is detected
-elif command -v yum >/dev/null 2>&1;
-then echo "yum is installed."
+export DISTRO_VERSION=$(grep -w "VERSION_ID" /etc/os-release | cut -d'=' -f2 | tr -d '"') # Print the distribution name and version
+echo "Operating system detected: $DISTRO_NAME, Version: $DISTRO_VERSION" # Check if dnf or yum is installed (dnf is used on newer systems, yum on older ones)
+if command -v dnf >/dev/null 2>&1; then
+echo "dnf is installed."
+export SYSTEMOS="RHL" # Set SYSTEMOS to RHL if dnf is detected
+elif command -v yum >/dev/null 2>&1; then
+echo "yum is installed."
 export SYSTEMOS="RHL"  # Set SYSTEMOS to RHL if yum is detected
 else
 echo "No package manager (dnf or yum) found."
@@ -101,48 +94,42 @@ fi
 else
 echo "Unable to detect the Linux distribution version."
 fi
-fi
-# Print the final detected OS
+fi # Print the final detected OS
 echo "Final operating system detected: $SYSTEMOS"
 ############################### Intel or GNU Compiler Option #############
 # Only proceed with RHL-specific logic if the system is RHL
-if [ "$SYSTEMOS" = "RHL" ];
-then
+if [ "$SYSTEMOS" = "RHL" ]; then
 # Check for 32-bit RHL system
-if [ "$SYSTEMBIT" = "32" ];
-then
+if [ "$SYSTEMBIT" = "32" ]; then
 echo "Your system is not compatible with this script."
-exit
+# exit
 fi
 # Check for 64-bit RHL system
-if [ "$SYSTEMBIT" = "64" ];
-then
+if [ "$SYSTEMBIT" = "64" ]; then
 echo "Your system is a 64-bit version of RHL Based Linux Kernel."
 echo "Intel compilers are not compatible with this script."
 echo "Setting compiler to GNU."
 export RHL_64bit_GNU=1
-echo "RHL_64bit_GNU=$RHL_64bit_GNU"
-# Check for the version of the GNU compiler (gcc)
+echo "RHL_64bit_GNU=$RHL_64bit_GNU" # Check for the version of the GNU compiler (gcc)
 export gcc_test_version=$(gcc -dumpversion 2>&1 | awk '{print $1}')
 export gcc_test_version_major=$(echo $gcc_test_version | awk -F. '{print $1}')
 export gcc_version_9="9"
-if [[ $gcc_test_version_major -lt $gcc_version_9 ]];
-then export RHL_64bit_GNU=2
+if [[ $gcc_test_version_major -lt $gcc_version_9 ]]; then
+export RHL_64bit_GNU=2
 echo "OLD GNU FILES FOUND."
 echo "RHL_64bit_GNU=$RHL_64bit_GNU"
 fi
 fi
 fi
 # Check for 64-bit Linux system (Debian/Ubuntu)
-if [ "$SYSTEMBIT" = "64" ] && [ "$SYSTEMOS" = "Linux" ];
-then
+if [ "$SYSTEMBIT" = "64" ] && [ "$SYSTEMOS" = "Linux" ]; then
 echo "Your system is a 64-bit version of Debian Linux Kernel."
 echo ""
 # Check if Ubuntu_64bit_Intel or Ubuntu_64bit_GNU environment variables are set
-if [ -n "$Ubuntu_64bit_Intel" ] || [ -n "$Ubuntu_64bit_GNU" ];
-then echo "The environment variable Ubuntu_64bit_Intel/GNU is already set."
-else echo "The environment variable Ubuntu_64bit_Intel/GNU is not set."
-# Prompt user to select a compiler (Intel or GNU)
+if [ -n "$Ubuntu_64bit_Intel" ] || [ -n "$Ubuntu_64bit_GNU" ]; then
+echo "The environment variable Ubuntu_64bit_Intel/GNU is already set."
+else
+echo "The environment variable Ubuntu_64bit_Intel/GNU is not set." # Prompt user to select a compiler (Intel or GNU)
 while read -r -p "Which compiler do you want to use?
 - Intel
 -- Please note that WRF_CMAQ is only compatible with GNU Compilers
@@ -168,28 +155,23 @@ done
 fi
 fi
 # Check for 32-bit Linux system
-if [ "$SYSTEMBIT" = "32" ] && [ "$SYSTEMOS" = "Linux" ];
-then
+if [ "$SYSTEMBIT" = "32" ] && [ "$SYSTEMOS" = "Linux" ]; then
 echo "Your system is not compatible with this script."
-exit
+# exit
 fi
 ############################# macOS Handling ##############################
 # Check for 32-bit MacOS system
-if [ "$SYSTEMBIT" = "32" ] && [ "$SYSTEMOS" = "MacOS" ];
-then
+if [ "$SYSTEMBIT" = "32" ] && [ "$SYSTEMOS" = "MacOS" ]; then
 echo "Your system is not compatible with this script."
-exit
+# exit
 fi
 # Check for 64-bit Intel-based MacOS system
-if [ "$SYSTEMBIT" = "64" ] && [ "$SYSTEMOS" = "MacOS" ] && [ "$MAC_CHIP" = "Intel" ];
-then
+if [ "$SYSTEMBIT" = "64" ] && [ "$SYSTEMOS" = "MacOS" ] && [ "$MAC_CHIP" = "Intel" ]; then
 echo "Your system is a 64-bit version of macOS with an Intel chip."
 echo "Intel compilers are not compatible with this script."
 echo "Setting compiler to GNU."
-export macos_64bit_GNU=1
-# Ensure Xcode Command Line Tools are installed
-if ! xcode-select --print-path &>/dev/null;
-then
+export macos_64bit_GNU=1 # Ensure Xcode Command Line Tools are installed
+if ! xcode-select --print-path &>/dev/null; then
 echo "Installing Xcode Command Line Tools..."
 xcode-select --install
 fi
@@ -201,15 +183,13 @@ eval "$(/usr/local/bin/brew shellenv)"
 chsh -s /bin/bash
 fi
 # Check for 64-bit ARM-based MacOS system (M1, M2 chips)
-if [ "$SYSTEMBIT" = "64" ] && [ "$SYSTEMOS" = "MacOS" ] && [ "$MAC_CHIP" = "ARM" ];
-then
+if [ "$SYSTEMBIT" = "64" ] && [ "$SYSTEMOS" = "MacOS" ] && [ "$MAC_CHIP" = "ARM" ]; then
 echo "Your system is a 64-bit version of macOS with an ARM chip (M1/M2)."
 echo "Intel compilers are not compatible with this script."
 echo "Setting compiler to GNU."
 export macos_64bit_GNU=1
 # Ensure Xcode Command Line Tools are installed
-if ! xcode-select --print-path &>/dev/null;
-then
+if ! xcode-select --print-path &>/dev/null; then
 echo "Installing Xcode Command Line Tools..."
 xcode-select --install
 fi
@@ -255,8 +235,7 @@ echo "Sufficient storage space for installation found."
 echo "-------------------------------------------------- "
 ;;
 [Gg]*)
-if [[ ${Storage_Space_Size} -lt ${Storage_Space_Required} ]];
-then
+if [[ ${Storage_Space_Size} -lt ${Storage_Space_Required} ]]; then
 echo "Not enough storage space for installation. 350GB is required."
 echo "-------------------------------------------------- "
 exit 1
@@ -288,7 +267,6 @@ while true; do
 	# Prompt for password verification
 	read -r -s -p "Please re-enter your password to verify: " password2
 	echo " "
-
 	# Check if the passwords match
 	if [ "$password1" = "$password2" ];
 	then
